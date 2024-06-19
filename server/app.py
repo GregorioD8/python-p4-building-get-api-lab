@@ -18,21 +18,43 @@ db.init_app(app)
 def index():
     return '<h1>Bakery GET API</h1>'
 
+# GET /bakeries: returns a list of JSON objects for all bakeries in the database.
 @app.route('/bakeries')
 def bakeries():
-    return ''
 
+    bakeries = [bakery.to_dict() for bakery in Bakery.query.all()]
+
+    return make_response(bakeries, 200)
+
+# GET /bakeries/<int:id>: returns a single bakery as JSON with its baked goods nested in a list. Use the id from the URL to look up the correct bakery.
 @app.route('/bakeries/<int:id>')
 def bakery_by_id(id):
-    return ''
+
+    bakery = Bakery.query.filter_by(id=id).first()
+    bakery_serialized = bakery.to_dict()
+
+    return make_response(bakery_serialized, 200)
+
+# GET /baked_goods/by_price: returns a list of baked goods as JSON, sorted by price in descending order. 
 
 @app.route('/baked_goods/by_price')
 def baked_goods_by_price():
-    return ''
+    
+    #using SQLAlchemy to sort the baked goods in descending order
+    baked_goods_by_price = BakedGood.query.order_by(BakedGood.price.desc()).all() 
+    baked_goods_by_price_serialized = [ bg.to_dict() for bg in baked_goods_by_price]
 
+    return make_response(baked_goods_by_price_serialized, 200)
+
+# GET /baked_goods/most_expensive: returns the single most expensive baked good as JSON
 @app.route('/baked_goods/most_expensive')
 def most_expensive_baked_good():
-    return ''
+    
+    #using SQLAlchemy to sort the baked goods in descending order and limit the number of results
+    most_expensive = BakedGood.query.order_by(BakedGood.price.desc()).limit(1).first()
+    most_expensive_serialized = most_expensive.to_dict()
+
+    return make_response(most_expensive_serialized, 200)
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
